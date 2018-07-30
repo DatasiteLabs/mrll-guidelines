@@ -1,0 +1,442 @@
+= Node guidelines
+Merrill Corporation
+v1, 2018
+:icons: font
+:sectnums:
+:sectlinks:
+:sectanchors:
+:linkattrs:
+:imagesdir: images
+:toc: left
+:toclevels: 4
+:source-highlighter: rouge
+ifdef::basebackend-html[]
+++++
+<link rel="stylesheet" href="../assets/fa.css">
+<link rel="stylesheet" href="../assets/highlight/styles/github.css">
+<script src="../assets/highlight/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+++++
+endif::[]
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+## Purpose of this document
+This document is meant to aid in three ways:
+
+. *Getting started with a new node project*: Infrastructure guides
+. *Reference*: A knowledge base of conventions and best practices that should be used across all node projects
+
+## Getting started
+
+### Node version
+[TIP]
+====
+Summary::
+* Use version 10 of node
+====
+
+.Node release chart
+image:node-lts-schedule.png[]
+As of this document, the current LTS version of node is v10. A Current version receives minor and patch releases regularly and an Active version receives them monthly. As of October 2018, v10 will become an Active release so it is beneficial for us to already be on v10 so that we won't have to think about updating early next year when version 8 goes into Maintenance mode.
+
+#### How the versioning works
+New major releases occur every six months. Odd-numbered releases occur in October and are actively supported for 6 months. Even-numbered releases occur in April and are actively supported for 18 months (LTS).
+
+It is beneficial to stay on LTS releases to ensure stability and to have a more predictable upgrade cycle.
+
+[NOTE]
+====
+Odd numbered versions are non-LTS releases. They should only be used for evaluation and not in production.
+
+*In production we should only use even-numbered LTS versions.*
+====
+
+### Javascript features support
+[TIP]
+====
+Summary::
+* Use typescript
+* Remember to import the typings for third-party dependencies and to save them in devDependencies
+* Use the same `tslint.json` and `tsconfig.json` whenever possible
+====
+Typescript is used in the front-end with Angular and it makes sense to keep things consistent when writing code with node as well.
+
+A further advantage, though one that is not as important with newer versions of node, is that it shields the developer from trying to account for which features are supported by the underlying node version. Typescript can transpile code to previous versions of the ECMAScript spec so that it can be compatible with older versions of node. Polyfills can be used when needed.
+
+##### Typings
+When working with typescript in node, we must remember to install and save the typings for node libraries. A lot of the node libraries are written and/or distributed in pure javascript without typings, and we need to ensure that the typings are present for support in IDEs and editors.
+
+##### Formatting
+It is recommended to use Prettier to assist with maintaining consistent formatting of the code and to avoid whitespace changes in diffs. 
+
+##### Linting and tsconfig.json
+It is recommended that the same `tslint.json` and `tsconfig.json` be used as in the front-end so that developers won't need to re-orient themselves when switching from one to the other. This is easier to accomplish in a mono-repo.
+
+##### Other options
+Other options are to use Babel to transpile the code, or to simply write javascript though this will require the developer to know which version of node is being targeted and also to rewrite the code when the node version is changed.
+
+### Frameworks
+[TIP]
+====
+Summary::
+* Use express
+====
+
+[autowidth,options="header"]
+|===
+| |Express | Koa | Nest | Verdict
+
+| Getting started
+| Getting started is relatively easy - there are a lot of tutorials and it is a mature framework.
+| It is similar enough to Express that users can switch over. The use of async functions might need some training.
+| There is a fair bit of abstraction - it is very similar to Angular in that sense. It also uses typescript by default and is modeled after Angular. 
+| Express
+
+| Syntax sugar and helpers
+| There is no provided syntax sugar. A lot of functions still use callbacks, though Promises are supported in most cases.
+| Async/await is the predominant pattern in the code and it makes things a bit easier to read; but error handling still needs a lot of attention.
+| There is a lot of sugar provided e.g. Decorators for controllers; this allows the developer to use the prescribed way of doing things rather than to code things by hand.
+| Nest
+
+| Out of the box functionality
+| A basic server with routing is possible. You need to have middleware to do anything more than this (body parser to help with JSON payloads, etc.)
+| Koa is very minimal by design - you need to install middleware to make it do anything else
+| Nest is built on top of Express and includes a lot of out of the box functionality. Similar to Angular, it comes with a lot built in.
+| Nest
+
+| Documentation
+| Documentation is thorough and maintained - versioning is available.
+| Documentation is present but not versioned. The descriptions are also generated and not in-depth and descriptive. It is more of a reference for methods and properties.
+| Documentation is good and versioned.
+| Express and Nest
+
+| Performance
+| Performance with Express is generally good - it largely depends on the number of middleware functions in use and routing configuration (developer code ignored)
+| Performace is the main focus
+| Performance is good
+| Koa
+
+| Maturity
+| Very mature
+| Stable
+| Relatively new
+| Express
+
+| Ease of finding developers
+| Easy
+| Hard to find people with direct experience but there is a fair amount of transferable skill from Express
+| It is a new framework so there won't be developers with direct experience
+| Express
+
+|===
+
+### Setting up Logging
+[TIP]
+====
+Summary::
+* Use Winston for logging
+* Use Splunk for log analysis
+====
+
+#### Winston
+link:https://github.com/winstonjs/winston[Winston] is a logging utility that supports many "transports" e.g. stdout, file, even network calls. Logs also have different severity levels that are customizable. Winston plays nicely with Splunk.
+
+#### Splunk
+Splunk is used on other back-ends at Merrill and should be used with node applications as well. It allows for analysis on log messages and retrieval of messages.
+
+## Tools
+
+### GraphQL
+[TIP]
+====
+Summary::
+* 
+====
+
+
+## Build
+[TIP]
+====
+Summary::
+* Use webpack to build
+* Run the server with javascript (not typescript)
+* Stay within confines of pipeline unless absolutely necessary
+====
+
+### Nx 
+
+
+## Development
+
+### Project structure
+[TIP]
+====
+Summary::
+* Ensure that all filenames are *lower-case*
+* Ensure that the root index file contains the minimum amount of initialization code and nothing else
+* Ensure that you break the application up by *resources*
+* Ensure that you are using the recommended libraries for each use case
+====
+
+There are some conventions that will ensure that we have a uniform experience across different Express-based apps:
+
+#### Lower-case filenames
+Certain file systems are case-insensitive and cause many issues with development, since what may work on that computer won't work on other systems. We always want to be deterministic in our builds and so we should ensure that we keep consistent file naming structure.
+
+* Use only lower-case letters
+* Separate words using hyphens
+* Use dots to separate the file type and extension e.g. `user.service.ts`
+
+#### Root `index.ts`
+The only work that is done in the root file is to initialize the app and start Express. Initialization will have at least the following steps:
+
+* Create the express app
+* Ensure that request handling is configured (JSON support with `body-parser`, CORS with `cors`)
+* Ensure that `helmet` is used
+* Register all the routers for each resource
+* Retrieve the environment config
+* Initialize logging
+* Initialize any external connections
+* Start listening to the port
+
+[WARNING]
+====
+* Ensure that the root index file contains no more than the bare minimum of initialization logic
+* Ensure that you export the initialization promise for the Express app so that you can test the server
+* Ensure that initialization is deterministic and that the server does not start unless all the initializations complete successfully
+====
+
+#### Resources
+An Express application is easier to reason about and to develop for when it is broken up by resource. All the files related to the concept of a `User` should exist together in a library. This includes the following:
+
+* Router for that resource
+** Route handlers for the resource
+* A service for that resource
+
+====
+For example, a sample User resource might have the following structure:
+----
+  libs
+  |-- myApp
+      |--user
+        |--src
+            |--lib
+            |  |--user.routes.ts
+            |  |--user.service.spec.ts
+            |  |--user.service.ts
+            |  |--user.utils.spec.ts <1>
+            |  |--user.utils.ts <1>
+            |
+            |--index.ts <2>
+----
+<1> Optional
+<2> The barrel exports the router and the service; and everything from utils if it exists
+====
+
+
+#### Libs
+Libraries help in modularizing and sharing code. Traditionally enterprises create a private npm repository that would be used to publish packages internally. In a mono-repo setting this is still possible but the intent is to directly use these libraries in our code without publishing them, and then having to import them back into the application.
+
+A back-end application can generally be broken up into smaller single-responsibility libraries that can be composed as needed. Each library is a self-contained module but can also expose services that can handle functionality specific to its particular domain.
+
+.An example of breaking an app into modules
+----
+Let's consider a todo list application. The below might be a potential structure for this application.
+
+--apps
+  |-- todo-app
+
+--libs
+  |-- user
+  |   |-- index.ts
+  |   |-- user.routes.ts
+  |   |-- user.service.ts
+  |   |-- user.types.ts
+  |-- task
+  |   |-- index.ts
+  |   |-- task.routes.ts
+  |   |-- task.service.ts
+  |   |-- task.types.ts
+  |-- util
+      |-- config.service.ts
+      |-- log.service.ts
+----
+
+Note the library breakdown by domain: if Task needs User, there is a direct dependency. There may be instances where there might be a circular dependency
+
+### Error handling
+[TIP]
+====
+Summary::
+* Use an Error library to help with propagating custom Errors
+====
+
+#### Promises
+Ensure that promise errors are caught. Any unhandled failed promises are treated as uncaught exceptions, and in future node versions will crash the process. See DEP0018 in the node documentation.
+
+In the following example, note that we don't have an error handler for the promise.
+
+[source, javascript]
+----
+router.get('/', (req, res) => {
+  return asyncGetResource() <1>
+    .then(resource => res.json(resource));
+}
+----
+<1> If `asyncGetResource` were to throw an error, then the request would time out. Why? There is no error handler for the promise, so this middleware never sends a response and will eventually timeout. On the server there would be a warning generated about unhandled exceptions along with a deprecation warning.
+
+.A correct implementation
+[source, javascript]
+----
+router.get('/', (req, res) => {
+  return asyncGetResource()
+    .then((resource: Response) => res.json(resource))
+    .catch(err => {
+      // log the error
+      res.status(500).end();
+    });
+}
+----
+
+#### Global error handler
+Ensure that there is a global error handler for express. This is identified by a middleware that takes 4 arguments - it must be exactly 4. This gets called whenever `next()` is called with an error (e.g. in authentication middleware). Use custom Errors here to display the appropriate error to the user.
+
+[source, javascript]
+----
+app.use((err, req, resp, next) => {
+  // log the error, return status code of 500
+});
+----
+
+[WARNING]
+====
+This must be the last middleware registered with Express for it to work as intended.
+====
+
+#### UncaughtExceptions
+Ensure that uncaught exceptions are handled but that the process still exits. This is the place to perform cleanup and to log the exception.
+
+[source, javascript]
+----
+process.on('uncaughtException', (err: Error) => {
+  logger.error(err);
+  // Perform some safe clean-up here if needed.
+  // Avoid anything that might throw other exceptions.
+  process.exit(1); <1>
+})
+----
+<1> Ensure that the process exits
+
+#### Testing
+##### frameworks
+There are two main testing frameworks in node: `Jest` and `Mocha`.
+
+Mocha::
+Mocha has been around for a long time and has a number of helpers (`chai` for more readable syntax, `chai-as-promised` for handling asynchronous code. etc.). Mocha needs a test runner to run.
+
+Jest::
+Jest is fairly new but has a number of benefits. It can handle most things out of the box: assertions, spies, mocks, it includes a runner, and many other utilities.
+
+### Using Logging
+[TIP]
+====
+Summary::
+* use Winston for logging
+* initialize winston
+====
+Winston is a fairly robust and mature solution for logging. It should be used in all cases, even where the logs are being handled by the process manager.
+
+#### Severity levels
+Out of the box, Winston comes with the same severity levels as `console`: debug, log, error, etc. It can be configured with custom severity levels as well, in cases where we want more control over handling the log call e.g. a severity of `catastrophic` that triggers an email to be dispatched.
+
+#### Transports
+Winston has a concept of transports: these are outlets for logs and can be configured to only output a message for a minimum severity level. Out of the box it is configured to a single transport for `stdout` but it is possible to also log ot files and remote endpoints.
+
+The recommendation is to use custom severity levels but only use the `stdout` or `console` transport. We can then handle these in PM2 for better visibility.
+
+### Authentication
+[TIP]
+====
+Summary::
+* use Passport for authentication
+====
+
+## Configuration and set up
+[TIP]
+====
+Summary::
+* Use PM2 as a process manager
+* Use nginx as a reverse proxy
+* Store all configuration in environment variables
+====
+
+### Process managers
+Node processes are meant to fail-fast. Any unexpected errors would leave the server application in an unpredictable state and so it is better to exit the process and restart the server. However, the logic to restart the server needs to live somewhere outside of your node application. This is where process managers come in.
+
+A Process Manager is responsible for maintaining multiple instances of the node processes for a single application. It is possible to roll your own, but as with most things it is best to use a mature framework if it exists because we need it to be reliable and proven.
+
+PM2::
+link:http://pm2.keymetrics.io/[PM2] is a process manager with many advanced features: monitoring, graceful shutdown, log file management, exception management, etc. It is available as an npm package.
+
+nodemon::
+link:http://nodemon.io/[nodemon] is mostly used for *local development*. It features file watching and can be configured with a config file. It can also run as a daemon.
+
+### nginx
+link:https://www.nginx.com/[Nginx] should be used as a load balancer and for SSL termination before handing off to PM2.
+
+### Environment configuration
+[TIP]
+====
+Summary::
+* Use cfenv to retrieve the environment configuration in the application
+* Make the application terminate if all the expected keys are not found
+====
+
+Cloud Foundry has a particular way of injecting environment variables:
+
+* link:https://docs.cloudfoundry.org/buildpacks/node/node-service-bindings.html[Cloud Foundry docs]
+* link:https://github.com/cloudfoundry-community/node-cfenv[cfenv]: Package to help with parsing the environment variables into an object that can be used immediately
+
+Rather than rolling our own, it is recommended to use this method of reading environment variables.
+
+[WARNING]
+====
+Ensure that there is an initialization step when the app starts to read in the environment variables into the config service. Do not start the app unless all the expected variables are present.
+====
+
+### URLs
+
+## Checklist
+Use this checklist to help you when developing an application
+
+.Application setup
+* [ ] Using node v10
+* [ ] Using typescript
+* [ ] tsconfig and tslint are set up in standard way
+* [ ] Using express or raw http
+
+.Build
+* [ ] Using pipeline provided
+
+.Development
+* [ ] lower-case filenames
+* [ ] root index file only performs initialization
+* [ ] libs are used to encapsulate domains
+* [ ] promises are always returned from functions (rather than executing in the background)
+* [ ] promises are always handled at the top level (in the controllers)
+* [ ] global error handler exists
+* [ ] uncaught exceptions are handled and process exits
+* [ ] use of jest (older projects may use mocha)
+* [ ] winston is set up
+* [ ] winston is initialized at start up
+* [ ] environment variables are captured at application startup
+* [ ] application terminates if all the required environment variables are not present
+
+.Running
+* [ ] PM2 is set up
