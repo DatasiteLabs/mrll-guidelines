@@ -1,3 +1,0 @@
-# Table of contents
-
-* link:README.adoc[Initial page]

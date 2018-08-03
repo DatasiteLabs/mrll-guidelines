@@ -2,13 +2,12 @@
 Merrill Corporation
 v1, 2018
 :icons: font
-:sectnums:
 :sectlinks:
 :sectanchors:
 :linkattrs:
 :imagesdir: images
 :toc: left
-:toclevels: 4
+:toclevels: 3
 :source-highlighter: rouge
 ifdef::basebackend-html[]
 ++++
@@ -26,15 +25,15 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-## Purpose of this document
+== Purpose of this document
 This document is meant to aid in three ways:
 
 . *Getting started with a new node project*: Infrastructure guides
 . *Reference*: A knowledge base of conventions and best practices that should be used across all node projects
 
-## Getting started
+== Getting started
 
-### Node version
+=== Node version
 [TIP]
 ====
 Summary::
@@ -45,7 +44,7 @@ Summary::
 image:node-lts-schedule.png[]
 As of this document, the current LTS version of node is v10. A Current version receives minor and patch releases regularly and an Active version receives them monthly. As of October 2018, v10 will become an Active release so it is beneficial for us to already be on v10 so that we won't have to think about updating early next year when version 8 goes into Maintenance mode.
 
-#### How the versioning works
+==== How the versioning works
 New major releases occur every six months. Odd-numbered releases occur in October and are actively supported for 6 months. Even-numbered releases occur in April and are actively supported for 18 months (LTS).
 
 It is beneficial to stay on LTS releases to ensure stability and to have a more predictable upgrade cycle.
@@ -57,7 +56,7 @@ Odd numbered versions are non-LTS releases. They should only be used for evaluat
 *In production we should only use even-numbered LTS versions.*
 ====
 
-### Javascript features support
+=== Javascript features support
 [TIP]
 ====
 Summary::
@@ -69,26 +68,26 @@ Typescript is used in the front-end with Angular and it makes sense to keep thin
 
 A further advantage, though one that is not as important with newer versions of node, is that it shields the developer from trying to account for which features are supported by the underlying node version. Typescript can transpile code to previous versions of the ECMAScript spec so that it can be compatible with older versions of node. Polyfills can be used when needed.
 
-##### Typings
+==== Typings
 When working with typescript in node, we must remember to install and save the typings for node libraries. A lot of the node libraries are written and/or distributed in pure javascript without typings, and we need to ensure that the typings are present for support in IDEs and editors.
 
-##### Formatting
+==== Formatting
 It is recommended to use Prettier to assist with maintaining consistent formatting of the code and to avoid whitespace changes in diffs. 
 
-##### Linting and tsconfig.json
+==== Linting and tsconfig.json
 It is recommended that the same `tslint.json` and `tsconfig.json` be used as in the front-end so that developers won't need to re-orient themselves when switching from one to the other. This is easier to accomplish in a mono-repo.
 
-##### Other options
+==== Other options
 Other options are to use Babel to transpile the code, or to simply write javascript though this will require the developer to know which version of node is being targeted and also to rewrite the code when the node version is changed.
 
-### Frameworks
+=== Frameworks
 [TIP]
 ====
 Summary::
 * Use express
 ====
 
-[autowidth,options="header"]
+[options="header"]
 |===
 | |Express | Koa | Nest | Verdict
 
@@ -136,7 +135,7 @@ Summary::
 
 |===
 
-### Setting up Logging
+=== Setting up Logging
 [TIP]
 ====
 Summary::
@@ -144,15 +143,15 @@ Summary::
 * Use Splunk for log analysis
 ====
 
-#### Winston
+==== Winston
 link:https://github.com/winstonjs/winston[Winston] is a logging utility that supports many "transports" e.g. stdout, file, even network calls. Logs also have different severity levels that are customizable. Winston plays nicely with Splunk.
 
-#### Splunk
+==== Splunk
 Splunk is used on other back-ends at Merrill and should be used with node applications as well. It allows for analysis on log messages and retrieval of messages.
 
-## Tools
+== Tools
 
-### GraphQL
+=== GraphQL
 [TIP]
 ====
 Summary::
@@ -160,7 +159,7 @@ Summary::
 ====
 
 
-## Build
+== Build
 [TIP]
 ====
 Summary::
@@ -169,12 +168,12 @@ Summary::
 * Stay within confines of pipeline unless absolutely necessary
 ====
 
-### Nx 
+=== Nx 
 
 
-## Development
+== Development
 
-### Project structure
+=== Project structure
 [TIP]
 ====
 Summary::
@@ -186,14 +185,14 @@ Summary::
 
 There are some conventions that will ensure that we have a uniform experience across different Express-based apps:
 
-#### Lower-case filenames
+==== Lower-case filenames
 Certain file systems are case-insensitive and cause many issues with development, since what may work on that computer won't work on other systems. We always want to be deterministic in our builds and so we should ensure that we keep consistent file naming structure.
 
 * Use only lower-case letters
 * Separate words using hyphens
 * Use dots to separate the file type and extension e.g. `user.service.ts`
 
-#### Root `index.ts`
+==== Root `index.ts`
 The only work that is done in the root file is to initialize the app and start Express. Initialization will have at least the following steps:
 
 * Create the express app
@@ -212,7 +211,7 @@ The only work that is done in the root file is to initialize the app and start E
 * Ensure that initialization is deterministic and that the server does not start unless all the initializations complete successfully
 ====
 
-#### Resources
+==== Resources
 An Express application is easier to reason about and to develop for when it is broken up by resource. All the files related to the concept of a `User` should exist together in a library. This includes the following:
 
 * Router for that resource
@@ -240,7 +239,7 @@ For example, a sample User resource might have the following structure:
 ====
 
 
-#### Libs
+==== Libs
 Libraries help in modularizing and sharing code. Traditionally enterprises create a private npm repository that would be used to publish packages internally. In a mono-repo setting this is still possible but the intent is to directly use these libraries in our code without publishing them, and then having to import them back into the application.
 
 A back-end application can generally be broken up into smaller single-responsibility libraries that can be composed as needed. Each library is a self-contained module but can also expose services that can handle functionality specific to its particular domain.
@@ -270,14 +269,58 @@ Let's consider a todo list application. The below might be a potential structure
 
 Note the library breakdown by domain: if Task needs User, there is a direct dependency. There may be instances where there might be a circular dependency
 
-### Error handling
+=== Testing
+==== frameworks
+There are two main testing frameworks in node: `Jest` and `Mocha`.
+
+Mocha::
+Mocha has been around for a long time and has a number of helpers (`chai` for more readable syntax, `chai-as-promised` for handling asynchronous code. etc.). Mocha needs a test runner to run.
+
+Jest::
+Jest is fairly new but has a number of benefits. It can handle most things out of the box: assertions, spies, mocks, it includes a runner, and many other utilities.
+
+=== Non-blocking code
 [TIP]
 ====
 Summary::
-* Use an Error library to help with propagating custom Errors
+* Ensure that code does not block
+* Ensure that all I/O is asynchronous except in limited cases
+* Use promises for all asynchronous code - convert callbacks to promises if needed
 ====
 
-#### Promises
+==== Event-loop
+It is worth the investment to understand the link:https://developer.mozilla.org/en-US/docs/Web/JavaScript/EventLoop[javascript event loop], especially if you're coming from other languages. One of the primary selling points of node has always been the asynchronous nature of the code: any blocking operations would prevent other requests from being processed and so all code makes use of callbacks and/or promises.
+
+==== Blocking I/O
+The node core library provides some methods which are deliberately synchronous e.g. `fs.existsSync` or `fs.readFileSync`. These methods are meant to be used only when absolutely required (when there is a possibility of a race condition that affects the application logic). All other I/O is meant to be asynchronous so that the process can be freed up to process other requests or functions in the queue.
+
+.Acceptable use-cases for synchronous I/O
+* Loading configuration on application startup
+* Avoiding race conditions with the file system e.g. Reading files or directories while other processes are able to write to them.
+
+.Unacceptable use-cases for synchronous I/O
+* Loading files from the file system into memory in full before streaming them out
+* Making requests to a different back-end
+
+
+==== Promises
+link:https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises[Promises] allow us to perform asynchronous actions in javascript. In a callback we supply a function that takes one argument for errors followed by arguments for responses. In contrast a promise returns an object called a "thenable" which allows us to chain calls to the `.then` method: each call to this method takes two callbacks: one for success and one for errors.
+
+One immediate benefit of promises is that each function invocation is wrapped in a try/catch so that exceptions within the callback functions are also propagated via the thenables.
+
+Promises also allow for errors to propagate to the error handlers. In the case where we have a function call proceeded by 4 `.then` calls, an error anywhere in the chain is propagated to the very first occurrence of an error handler anywhere in the chain.
+
+Error handlers can choose to rethrow the error  to the next error handler, or to return a value which then propagates to the next thenable.
+
+=== Error handling
+[TIP]
+====
+Summary::
+* Ensure that exceptions are caught and minimize UncaughtExceptions
+* Use custom Errors to help with managing Errors
+====
+
+==== Promises
 Ensure that promise errors are caught. Any unhandled failed promises are treated as uncaught exceptions, and in future node versions will crash the process. See DEP0018 in the node documentation.
 
 In the following example, note that we don't have an error handler for the promise.
@@ -304,7 +347,7 @@ router.get('/', (req, res) => {
 }
 ----
 
-#### Global error handler
+==== Global error handler
 Ensure that there is a global error handler for express. This is identified by a middleware that takes 4 arguments - it must be exactly 4. This gets called whenever `next()` is called with an error (e.g. in authentication middleware). Use custom Errors here to display the appropriate error to the user.
 
 [source, javascript]
@@ -319,7 +362,7 @@ app.use((err, req, resp, next) => {
 This must be the last middleware registered with Express for it to work as intended.
 ====
 
-#### UncaughtExceptions
+==== UncaughtExceptions
 Ensure that uncaught exceptions are handled but that the process still exits. This is the place to perform cleanup and to log the exception.
 
 [source, javascript]
@@ -333,17 +376,66 @@ process.on('uncaughtException', (err: Error) => {
 ----
 <1> Ensure that the process exits
 
-#### Testing
-##### frameworks
-There are two main testing frameworks in node: `Jest` and `Mocha`.
+=== Callback hell
+[TIP]
+====
+Summary::
+* embrace the functional nature of javascript: write small and single-purpose functions
+* consider using named functions instead of lambdas
+* favour promises over callbacks
+====
+"Callback hell" refers to a readability concern when working with nested callbacks. Since a callback is passed into a function in order to carry out the next asynchronous operation, a multi-step asynchronous process would produce multiple levels of indentation.
 
-Mocha::
-Mocha has been around for a long time and has a number of helpers (`chai` for more readable syntax, `chai-as-promised` for handling asynchronous code. etc.). Mocha needs a test runner to run.
+Consider the following example which checks a user's password in a two-step process: fetching the user and then checking the password.
 
-Jest::
-Jest is fairly new but has a number of benefits. It can handle most things out of the box: assertions, spies, mocks, it includes a runner, and many other utilities.
+[source, javascript]
+----
+// NB: callbacks for illustration purpose only!
+function checkPass(password, cb) {
+  getUserById(id, (userErr, user) => { <1>
+    if (userErr) return cb(new UserFailedError()); <2>
 
-### Using Logging
+    compareUserPassword(user.password, password, (locationErr, location) => {
+      if (locationErr) return cb(PasswordCheckFailedError()); <3>
+
+      cb(getFilteredProps(user));
+    });
+  });
+}
+----
+<1> Indentation level 1
+<2> Indentation level 2
+<3> Indentation level 3
+
+.There are a number of inconveniences with this code
+* Every level of nesting adds a new closure (variables in the outer functions cannot be cleaned up until the entire sequence is completed).
+* It is very difficult to visually parse long nested code
+* The nesting leads to code that stretches horizontally (so that it doesn't fit in the viewport), which makes code review difficult
+* Error handling is very manual (you need to remember to handle the errors at each callback)
+* Any exceptions thrown in the callback functions become UnhandledExceptions
+
+Consider the following code where we've refactored to use promises:
+
+[source, javascript]
+----
+function checkPass(password) {
+  return getUserById(id)
+    .then(user => compareUserPassword(user.password, password))
+    .then(getFilteredProps);
+}
+
+// and to call it
+checkPass(req.password)
+  .then(userProps => resp.json(userProps))
+  .catch(err => resp.sendError('password check failed'));
+----
+
+.Some benefits gained
+* Improved readability (fewer levels of indentation, concise functions)
+* Error handling is propagated and can be handled in a single place
+* Exceptions thrown can be caught in the promise chain and won't result in UnhandledExceptions
+
+=== Using Logging
 [TIP]
 ====
 Summary::
@@ -352,22 +444,22 @@ Summary::
 ====
 Winston is a fairly robust and mature solution for logging. It should be used in all cases, even where the logs are being handled by the process manager.
 
-#### Severity levels
+==== Severity levels
 Out of the box, Winston comes with the same severity levels as `console`: debug, log, error, etc. It can be configured with custom severity levels as well, in cases where we want more control over handling the log call e.g. a severity of `catastrophic` that triggers an email to be dispatched.
 
-#### Transports
+==== Transports
 Winston has a concept of transports: these are outlets for logs and can be configured to only output a message for a minimum severity level. Out of the box it is configured to a single transport for `stdout` but it is possible to also log ot files and remote endpoints.
 
 The recommendation is to use custom severity levels but only use the `stdout` or `console` transport. We can then handle these in PM2 for better visibility.
 
-### Authentication
+=== Authentication
 [TIP]
 ====
 Summary::
 * use Passport for authentication
 ====
 
-## Configuration and set up
+== Configuration and set up
 [TIP]
 ====
 Summary::
@@ -376,7 +468,7 @@ Summary::
 * Store all configuration in environment variables
 ====
 
-### Process managers
+=== Process managers
 Node processes are meant to fail-fast. Any unexpected errors would leave the server application in an unpredictable state and so it is better to exit the process and restart the server. However, the logic to restart the server needs to live somewhere outside of your node application. This is where process managers come in.
 
 A Process Manager is responsible for maintaining multiple instances of the node processes for a single application. It is possible to roll your own, but as with most things it is best to use a mature framework if it exists because we need it to be reliable and proven.
@@ -387,10 +479,10 @@ link:http://pm2.keymetrics.io/[PM2] is a process manager with many advanced feat
 nodemon::
 link:http://nodemon.io/[nodemon] is mostly used for *local development*. It features file watching and can be configured with a config file. It can also run as a daemon.
 
-### nginx
+=== nginx
 link:https://www.nginx.com/[Nginx] should be used as a load balancer and for SSL termination before handing off to PM2.
 
-### Environment configuration
+=== Environment configuration
 [TIP]
 ====
 Summary::
@@ -410,16 +502,16 @@ Rather than rolling our own, it is recommended to use this method of reading env
 Ensure that there is an initialization step when the app starts to read in the environment variables into the config service. Do not start the app unless all the expected variables are present.
 ====
 
-### URLs
+=== URLs
 
-## Checklist
+== Checklist
 Use this checklist to help you when developing an application
 
 .Application setup
 * [ ] Using node v10
 * [ ] Using typescript
 * [ ] tsconfig and tslint are set up in standard way
-* [ ] Using express or raw http
+* [ ] Using express
 
 .Build
 * [ ] Using pipeline provided
@@ -437,6 +529,33 @@ Use this checklist to help you when developing an application
 * [ ] winston is initialized at start up
 * [ ] environment variables are captured at application startup
 * [ ] application terminates if all the required environment variables are not present
+* [ ] there is no blocking code except in very limited and deliberate cases
 
 .Running
 * [ ] PM2 is set up
+
+
+
+
+
+
+== TODOs
+
+=== Generators
+e.g. Restify
+
+=== Use-cases that don't fit these 
+
+* 
+
+=== How to evolve these guidelines
+
+* Ensure you can defend the proposed change
+  ** provide a use-case; this could be an Issue
+  ** provide sample code for use case
+* PRs
+  ** welcome and encouraged
+  ** important for guidelines acceptance
+  ** should be a branch on your sample application or relevant repo
+
+=== Consequence of not following the guidelines
