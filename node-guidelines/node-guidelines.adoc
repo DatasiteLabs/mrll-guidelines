@@ -1,13 +1,13 @@
 = Node guidelines
 Merrill Corporation
 v1, 2018
+:toc: left
+:toclevels: 3
 :icons: font
 :sectlinks:
 :sectanchors:
 :linkattrs:
 :imagesdir: images
-:toc: left
-:toclevels: 3
 :source-highlighter: rouge
 ifdef::basebackend-html[]
 ++++
@@ -25,19 +25,50 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
+
 == Purpose of this document
 This document is meant to aid in three ways:
 
 . *Getting started with a new node project*: Infrastructure guides
 . *Reference*: A knowledge base of conventions and best practices that should be used across all node projects
 
+== Checklist
+Use this checklist to help you when developing an application
+
+.Application setup
+* [ ] Using node v10
+* [ ] Using typescript
+* [ ] tsconfig and tslint are set up in standard way
+* [ ] Using express
+
+.Build
+* [ ] Using pipeline provided
+
+.Development
+* [ ] lower-case filenames
+* [ ] root index file only performs initialization
+* [ ] libs are used to encapsulate domains
+* [ ] promises are always returned from functions (rather than executing in the background)
+* [ ] promises are always handled at the top level (in the controllers)
+* [ ] global error handler exists
+* [ ] uncaught exceptions are handled and process exits
+* [ ] use of jest (older projects may use mocha)
+* [ ] winston is set up
+* [ ] winston is initialized at start up
+* [ ] environment variables are captured at application startup
+* [ ] application terminates if all the required environment variables are not present
+* [ ] there is no blocking code except in very limited and deliberate cases
+
+.Running
+* [ ] PM2 is set up
+
+
 == Getting started
 
 === Node version
-[TIP]
+[IMPORTANT]
 ====
-Summary::
-* Use version 10 of node
+* [ ] Use version 10 of node
 ====
 
 .Node release chart
@@ -57,12 +88,11 @@ Odd numbered versions are non-LTS releases. They should only be used for evaluat
 ====
 
 === Javascript features support
-[TIP]
+[IMPORTANT]
 ====
-Summary::
-* Use typescript
-* Remember to import the typings for third-party dependencies and to save them in devDependencies
-* Use the same `tslint.json` and `tsconfig.json` whenever possible
+* [ ] Use typescript
+* [ ] Remember to import the typings for third-party dependencies and to save them in devDependencies
+* [ ] Use the same `tslint.json` and `tsconfig.json` whenever possible
 ====
 Typescript is used in the front-end with Angular and it makes sense to keep things consistent when writing code with node as well.
 
@@ -81,10 +111,9 @@ It is recommended that the same `tslint.json` and `tsconfig.json` be used as in 
 Other options are to use Babel to transpile the code, or to simply write javascript though this will require the developer to know which version of node is being targeted and also to rewrite the code when the node version is changed.
 
 === Frameworks
-[TIP]
+[IMPORTANT]
 ====
-Summary::
-* Use express
+* [ ] Use express
 ====
 
 [options="header"]
@@ -117,7 +146,7 @@ Summary::
 
 | Performance
 | Performance with Express is generally good - it largely depends on the number of middleware functions in use and routing configuration (developer code ignored)
-| Performace is the main focus
+| Performance is the main focus
 | Performance is good
 | Koa
 
@@ -136,51 +165,82 @@ Summary::
 |===
 
 === Setting up Logging
-[TIP]
+[IMPORTANT]
 ====
-Summary::
-* Use Winston for logging
-* Use Splunk for log analysis
+* [ ] Use Winston for logging
+* [ ] Use Splunk for log analysis
 ====
 
 ==== Winston
 link:https://github.com/winstonjs/winston[Winston] is a logging utility that supports many "transports" e.g. stdout, file, even network calls. Logs also have different severity levels that are customizable. Winston plays nicely with Splunk.
 
+==== Bunyan
+link:https://github.com/trentm/node-bunyan[Bunyan] is another logging utility. One of the big sells for bunyan is that each line of output is stringified JSON.
+
+==== Winston vs. Bunyan
+
+|===
+| |Winston |Bunyan |Verdict
+
+| Ease of use
+| There is some manual configuration of transports required
+| There is out-of-the-box JSON output on every log line
+| Bunyan
+
+| Library maintenance
+| Actively maintained
+| Last commit was June 2017
+| Winston
+
+| Splunk integration
+| link:https://www.npmjs.com/package/winston-splunk-httplogger[Streaming support]
+| link:https://www.npmjs.com/package/splunk-bunyan-logger[Streaming support]
+| Slight advantage for bunyan is that it is referenced on the Splunk site as supported (although it is currently not maintained)
+
+| Popularity
+| Always has more downloads
+| Steady downloads over time
+| Winston
+
+|===
+
+image::winston-bunyan.png[]
+
+The recommendation is to use Winston over bunyan because it is actively maintained and has the larger market share, making it a safer bet long-term.
+
 ==== Splunk
 Splunk is used on other back-ends at Merrill and should be used with node applications as well. It allows for analysis on log messages and retrieval of messages.
+
+===== Streaming vs batch
+Splunk can either be sent logs via HTTP/HTTPS or by scanning log files periodically.
+
 
 == Tools
 
 === GraphQL
-[TIP]
+[IMPORTANT]
 ====
-Summary::
-* 
+* [ ] TBC
 ====
 
 
 == Build
-[TIP]
+[IMPORTANT]
 ====
-Summary::
-* Use webpack to build
-* Run the server with javascript (not typescript)
-* Stay within confines of pipeline unless absolutely necessary
+* [ ] Use webpack to build
+* [ ] Run the server with javascript (not typescript)
+* [ ] Stay within confines of pipeline unless absolutely necessary
 ====
-
-=== Nx 
-
 
 == Development
 
 === Project structure
-[TIP]
+[IMPORTANT]
 ====
-Summary::
-* Ensure that all filenames are *lower-case*
-* Ensure that the root index file contains the minimum amount of initialization code and nothing else
-* Ensure that you break the application up by *resources*
-* Ensure that you are using the recommended libraries for each use case
+* [ ] Ensure that all filenames are *lower-case*
+* [ ] Ensure that the root index file contains the minimum amount of initialization code and nothing else
+* [ ] Ensure that you break the application up by *resources*
+* [ ] Ensure that you are using the recommended libraries for each use case
 ====
 
 There are some conventions that will ensure that we have a uniform experience across different Express-based apps:
@@ -279,13 +339,43 @@ Mocha has been around for a long time and has a number of helpers (`chai` for mo
 Jest::
 Jest is fairly new but has a number of benefits. It can handle most things out of the box: assertions, spies, mocks, it includes a runner, and many other utilities.
 
-=== Non-blocking code
-[TIP]
+|===
+| |Mocha | Jest | Verdict
+
+| Out of the box features
+| Mocha provides only the testing framework. You still need to wire it up with a test runner, assertion library (like Chai and chai-as-promised), mocking library (like Sinon), code coverage library (like Istanbul), etc.
+| Jest comes with all of those built-in out of the box.
+| Jest
+
+| Configuration
+| Mocha needs a fair bit of configuration to set up; you also need to set up the test runner, code coverage tool, etc.
+| The configuration is minimal and the framework makes some sensible assumptions to get started quickly (e.g. that test files end in `spec.js`
+| Jest
+
+| Extensibility
+| Mocha is a mature framework and has a large community with many extensions
+| Jest is fairly new and there are extensions for some functions (e.g. typescript support) but not as much as mocha
+| Mocha
+
+| Maturity
+| Mocha has been around for a long time and some of the associated tooling (e.g. Chai) have been around almost as long
+| Jest is fairly new but has a large backing and has the advantage 
+| Mocha
+|===
+
+[NOTE]
 ====
-Summary::
-* Ensure that code does not block
-* Ensure that all I/O is asynchronous except in limited cases
-* Use promises for all asynchronous code - convert callbacks to promises if needed
+Despite being relatively new Jest has the advantage of coming with almost everything needed out of the box. This reduces the amount of setup and configuration required and allows the developer to get started quickly.
+
+*Jest is recommended*
+====
+
+=== Non-blocking code
+[IMPORTANT]
+====
+* [ ] Ensure that code does not block
+* [ ] Ensure that all I/O is asynchronous except in limited cases
+* [ ] Use promises for all asynchronous code - convert callbacks to promises if needed
 ====
 
 ==== Event-loop
@@ -313,11 +403,11 @@ Promises also allow for errors to propagate to the error handlers. In the case w
 Error handlers can choose to rethrow the error  to the next error handler, or to return a value which then propagates to the next thenable.
 
 === Error handling
-[TIP]
+[IMPORTANT]
 ====
-Summary::
-* Ensure that exceptions are caught and minimize UncaughtExceptions
-* Use custom Errors to help with managing Errors
+* [ ] Ensure that exceptions are caught and minimize UncaughtExceptions
+* [ ] Ensure that promises have an error handler at the root of the promise chain
+* [ ] Use custom Errors to help with managing Errors
 ====
 
 ==== Promises
@@ -377,12 +467,12 @@ process.on('uncaughtException', (err: Error) => {
 <1> Ensure that the process exits
 
 === Callback hell
-[TIP]
+[IMPORTANT]
 ====
-Summary::
-* embrace the functional nature of javascript: write small and single-purpose functions
-* consider using named functions instead of lambdas
-* favour promises over callbacks
+* [ ] embrace the functional nature of javascript: write small and single-purpose functions
+* [ ] consider using named functions instead of lambdas
+* [ ] favour promises over callbacks
+* [ ] if you use async/await, ensure that errors are handled
 ====
 "Callback hell" refers to a readability concern when working with nested callbacks. Since a callback is passed into a function in order to carry out the next asynchronous operation, a multi-step asynchronous process would produce multiple levels of indentation.
 
@@ -436,11 +526,10 @@ checkPass(req.password)
 * Exceptions thrown can be caught in the promise chain and won't result in UnhandledExceptions
 
 === Using Logging
-[TIP]
+[IMPORTANT]
 ====
-Summary::
-* use Winston for logging
-* initialize winston
+* [ ] use Winston for logging
+* [ ] initialize winston
 ====
 Winston is a fairly robust and mature solution for logging. It should be used in all cases, even where the logs are being handled by the process manager.
 
@@ -452,20 +541,19 @@ Winston has a concept of transports: these are outlets for logs and can be confi
 
 The recommendation is to use custom severity levels but only use the `stdout` or `console` transport. We can then handle these in PM2 for better visibility.
 
+
 === Authentication
-[TIP]
+[IMPORTANT]
 ====
-Summary::
-* use Passport for authentication
+* [ ] use Passport for authentication
 ====
 
 == Configuration and set up
-[TIP]
+[IMPORTANT]
 ====
-Summary::
-* Use PM2 as a process manager
-* Use nginx as a reverse proxy
-* Store all configuration in environment variables
+* [ ] Use PM2 as a process manager
+* [ ] Use nginx as a reverse proxy
+* [ ] Store all configuration in environment variables
 ====
 
 === Process managers
@@ -479,15 +567,15 @@ link:http://pm2.keymetrics.io/[PM2] is a process manager with many advanced feat
 nodemon::
 link:http://nodemon.io/[nodemon] is mostly used for *local development*. It features file watching and can be configured with a config file. It can also run as a daemon.
 
+
 === nginx
 link:https://www.nginx.com/[Nginx] should be used as a load balancer and for SSL termination before handing off to PM2.
 
 === Environment configuration
-[TIP]
+[IMPORTANT]
 ====
-Summary::
-* Use cfenv to retrieve the environment configuration in the application
-* Make the application terminate if all the expected keys are not found
+* [ ] Use cfenv to retrieve the environment configuration in the application
+* [ ] Make the application terminate if all the expected keys are not found
 ====
 
 Cloud Foundry has a particular way of injecting environment variables:
@@ -502,42 +590,8 @@ Rather than rolling our own, it is recommended to use this method of reading env
 Ensure that there is an initialization step when the app starts to read in the environment variables into the config service. Do not start the app unless all the expected variables are present.
 ====
 
+
 === URLs
-
-== Checklist
-Use this checklist to help you when developing an application
-
-.Application setup
-* [ ] Using node v10
-* [ ] Using typescript
-* [ ] tsconfig and tslint are set up in standard way
-* [ ] Using express
-
-.Build
-* [ ] Using pipeline provided
-
-.Development
-* [ ] lower-case filenames
-* [ ] root index file only performs initialization
-* [ ] libs are used to encapsulate domains
-* [ ] promises are always returned from functions (rather than executing in the background)
-* [ ] promises are always handled at the top level (in the controllers)
-* [ ] global error handler exists
-* [ ] uncaught exceptions are handled and process exits
-* [ ] use of jest (older projects may use mocha)
-* [ ] winston is set up
-* [ ] winston is initialized at start up
-* [ ] environment variables are captured at application startup
-* [ ] application terminates if all the required environment variables are not present
-* [ ] there is no blocking code except in very limited and deliberate cases
-
-.Running
-* [ ] PM2 is set up
-
-
-
-
-
 
 == TODOs
 
