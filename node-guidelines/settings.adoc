@@ -1,13 +1,8 @@
-= Node guidelines summary
-Merrill Corporation
-v1, 2018
 :icons: font
 :sectlinks:
 :sectanchors:
 :linkattrs:
 :imagesdir: images
-:toc: left
-:toclevels: 3
 :source-highlighter: rouge
 ifdef::basebackend-html[]
 ++++
@@ -24,5 +19,3 @@ ifdef::env-github[]
 :caution-caption: :fire:
 :warning-caption: :warning:
 endif::[]
-
-== Node version
